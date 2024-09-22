@@ -1,0 +1,54 @@
+# .github/workflows/ci.yml
+name: Go CI Workflow
+
+# Trigger this workflow on push and pull request events
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# Define jobs for the workflow
+jobs:
+  build:
+
+    # Use Ubuntu as the environment
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Go environment
+      - name: Set up Go 1.20
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.20
+
+      # Step 3: Cache Go modules for faster builds
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      # Step 4: Install dependencies
+      - name: Install dependencies
+        run: go mod tidy
+
+      # Step 5: Run tests (you'll add tests later)
+      - name: Run tests
+        run: go test ./...
+
+      # Step 6: Build the Go application
+      - name: Build Go HTTP server
+        run: go build -v .
+
+      # Optional: Add a deployment step (e.g., to Docker, AWS, etc.)
